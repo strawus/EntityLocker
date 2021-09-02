@@ -59,12 +59,14 @@ class EntityLocker<K> (private val escalationThreshold: Int) {
   }
 
   private fun detectDeadlock(baseKey: K, heldKey: K) {
-    locks[heldKey]?.waiters()?.forEach { waitingThread ->
+    waiters(heldKey).forEach { waitingThread ->
       val heldKeys = heldKeys.getValue(waitingThread)
       if (baseKey in heldKeys) throw DeadlockException()
       heldKeys.forEach { detectDeadlock(baseKey, it) }
     }
   }
+
+  private fun waiters(heldKey: K) = locks[heldKey]?.waiters() ?: emptyList()
 
   private inline fun <T> withTimeout(timeout: Long, unit: TimeUnit, block: () -> T): T {
     val currentThread = currentThread()
