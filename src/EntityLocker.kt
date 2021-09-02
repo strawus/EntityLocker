@@ -23,7 +23,7 @@ class EntityLocker<K> (private val escalationThreshold: Int) {
     }
   }
 
-  private fun lockInterruptibly(key: K) = synchronized(this) {
+  private fun lockInterruptibly(key: K) {
     val lock = locks.computeIfAbsent(key) { WaitersAwareReentrantLock() }
     if (lock.isLocked) detectDeadlock(key)
 
